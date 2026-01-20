@@ -48,13 +48,12 @@ async function addTask(description){
     let tasks = [];
 
     let fileExist = existsSync('tasks.json');
-    console.log(fileExist);
 
     if (!fileExist){
         try {
             tasks.push(task);
             await writeFile('./tasks.json', JSON.stringify(tasks));
-            console.log('Task created successfully.');
+            console.log(`Output: Task added successfully. (ID: ${task["id"]})`);
         } catch (err) {
             console.log(`Error: ${err}`);
         }
@@ -65,7 +64,7 @@ async function addTask(description){
             task["id"] = Object.keys(tasks).filter(key => key === "id").length + 1;
             tasks.push(task);
             await writeFile('./tasks.json', JSON.stringify(tasks));
-            console.log('Task created successfully.');
+            console.log(`Output: Task added successfully. (ID: ${task["id"]})`);
         } catch (err) {
             console.log(`Error: ${err}`);
         }

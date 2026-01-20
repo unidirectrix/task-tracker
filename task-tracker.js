@@ -44,6 +44,15 @@ if(subCommand === "list"){
     }
 }
 
+if(subCommand === "update"){
+    const id = argv[4];
+    const description = argv[5];
+    if (id === undefined || description === undefined){
+        throw new Error('Error. Perhaps you\'re missing an input?');
+    }
+    subCommands["update"](id, description);
+}
+
 async function addTask(description){
     const now = new Date().toISOString();
     const task = {
@@ -80,7 +89,35 @@ async function addTask(description){
     }
 }
 
-function updateTask(){
+async function updateTask(id, description){
+    let tasks = [];
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+        try {
+            const file = await readFile('./tasks.json'); 
+            tasks = JSON.parse(file);
+            let taskLength = tasks.length;
+            const now = new Date().toISOString();
+            if(parseInt(id) > taskLength-1 || parseInt(id) < 0) {
+                // slight bug in cli, make negative numbers recognized
+                // might need to escape flags -
+                throw new Error('Invalid id/id does not exist.');
+            }
+            for (const task of tasks){
+              if (task["id"] === parseInt(id)){
+                console.log("TEST");
+                task["description"] = description;
+                task["updatedAt"] = now; 
+              }
+            }
+            await writeFile('./tasks.json', JSON.stringify(tasks));
+            console.log(`Output: Task updated successfully. (ID: ${id})`);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
 function deleteTask(){

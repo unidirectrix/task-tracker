@@ -1,0 +1,14 @@
+{
+  "name": "task-tracker",
+  "version": "1.0.0",
+  "description": "A very basic CLI for a task tracker using only JSON",
+  "main": "task-tracker.js",
+  "type": "module",
+  "scripts": {
+    "start": "node task-tracker.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

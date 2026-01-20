@@ -53,6 +53,14 @@ if(subCommand === "update"){
     subCommands["update"](id, description);
 }
 
+if(subCommand === "delete"){
+    const id = argv[4];
+    if (id === undefined) {
+        throw new Error('Error. Perhaps you\'re missing an input?');
+    }
+    subCommands["delete"](id);
+}
+
 async function addTask(description){
     const now = new Date().toISOString();
     const task = {
@@ -79,7 +87,7 @@ async function addTask(description){
         try {
             const file = await readFile('./tasks.json');
             tasks = JSON.parse(file);
-            task["id"] = Object.keys(tasks).filter(key => key === "id").length + 1;
+            task["id"] = tasks[tasks.length-1]["id"] + 1; 
             tasks.push(task);
             await writeFile('./tasks.json', JSON.stringify(tasks));
             console.log(`Output: Task added successfully. (ID: ${task["id"]})`);
@@ -98,9 +106,8 @@ async function updateTask(id, description){
         try {
             const file = await readFile('./tasks.json'); 
             tasks = JSON.parse(file);
-            let taskLength = tasks.length;
             const now = new Date().toISOString();
-            if(parseInt(id) > taskLength-1 || parseInt(id) < 0) {
+            if(parseInt(id) > tasks.length-1 || parseInt(id) < 0) {
                 // slight bug in cli, make negative numbers recognized
                 // might need to escape flags -
                 throw new Error('Invalid id/id does not exist.');
@@ -120,7 +127,25 @@ async function updateTask(id, description){
     }
 }
 
-function deleteTask(){
+async function deleteTask(id){
+    let tasks = [];
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+       try {
+           const file = await readFile('./tasks.json');
+           tasks = JSON.parse(file);
+           if (parseInt(id) > tasks.length-1 || parseInt(id) < 0) {
+               throw new Error('Invalid id/id does not exist.');
+           }
+           const editedTasks = tasks.filter(task => task["id"] !== parseInt(id));
+           await writeFile('./tasks.json', JSON.stringify(editedTasks));
+           console.log(`Output: Task deleted successfully. (ID: ${id})`);
+       } catch (err) {
+           console.log(err);
+       }
+    }
 }
 
 async function listTasks(status=undefined){
@@ -152,7 +177,6 @@ async function listTasks(status=undefined){
                console.log(`Created at: ${task["createdAt"]}`);
                console.log(`Updated at: ${task["updatedAt"]}`);
                console.log('\n');
-
             }
           }
        }

@@ -61,6 +61,32 @@ if(subCommand === "delete"){
     subCommands["delete"](id);
 }
 
+if(subCommand === "mark-in-progress"){
+    const id = argv[4];
+    if (id === undefined) {
+        throw new Error('Error. Perhaps you\'re missing an input?');
+    }
+    subCommands["mark-in-progress"](id);
+}
+
+if(subCommand === "mark-done"){
+    const id = argv[4];
+    if (id === undefined) {
+        throw new Error('Error. Perhaps you\'re missing an input?');
+    }
+    subCommands["mark-done"](id);
+
+}
+
+if(subCommand === "mark-todo"){
+    const id = argv[4];
+    if (id === undefined) {
+        throw new Error('Error. Perhaps you\'re missing an input?');
+    }
+    subCommands["mark-todo"](id);
+
+}
+
 async function addTask(description){
     const now = new Date().toISOString();
     const task = {
@@ -107,17 +133,16 @@ async function updateTask(id, description){
             const file = await readFile('./tasks.json'); 
             tasks = JSON.parse(file);
             const now = new Date().toISOString();
-            if(parseInt(id) > tasks.length-1 || parseInt(id) < 0) {
-                // slight bug in cli, make negative numbers recognized
-                // might need to escape flags -
-                throw new Error('Invalid id/id does not exist.');
-            }
+            let idFound = false;
             for (const task of tasks){
               if (task["id"] === parseInt(id)){
-                console.log("TEST");
                 task["description"] = description;
                 task["updatedAt"] = now; 
+                idFound = true;
               }
+            }
+            if (!idFound){
+                throw new Error('Invalid id/id does not exist.');
             }
             await writeFile('./tasks.json', JSON.stringify(tasks));
             console.log(`Output: Task updated successfully. (ID: ${id})`);
@@ -136,10 +161,14 @@ async function deleteTask(id){
        try {
            const file = await readFile('./tasks.json');
            tasks = JSON.parse(file);
-           if (parseInt(id) > tasks.length-1 || parseInt(id) < 0) {
+           let idFound = false; 
+           const editedTasks = tasks.filter(task => task["id"] !== parseInt(id));
+           if (editedTasks.length !== tasks.length) {
+              idFound = true; 
+           }
+           if (!idFound){
                throw new Error('Invalid id/id does not exist.');
            }
-           const editedTasks = tasks.filter(task => task["id"] !== parseInt(id));
            await writeFile('./tasks.json', JSON.stringify(editedTasks));
            console.log(`Output: Task deleted successfully. (ID: ${id})`);
        } catch (err) {
@@ -183,12 +212,87 @@ async function listTasks(status=undefined){
     }
 }
 
-function markTaskInProgress(){
+async function markTaskInProgress(id){
+    let tasks = []
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+        try {
+            const file = await readFile('./tasks.json');
+            tasks = JSON.parse(file);
+            const now = new Date().toISOString();
+            let idFound = false; 
+            for (const task of tasks) {
+                if (task["id"] === parseInt(id)) {
+                   task["status"] = 'in-progress'; 
+                   idFound = true;
+                }
+            }
+            if (!idFound) {
+                throw new Error('Invalid id/id does not exist.');
+            }
+            await writeFile('./tasks.json', JSON.stringify(tasks));
+            console.log(`Output: Task updated successfully. (ID: ${id})`);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
-function markTaskDone(){
+async function markTaskDone(id){
+    let tasks = []
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+        try {
+            const file = await readFile('./tasks.json');
+            tasks = JSON.parse(file);
+            const now = new Date().toISOString();
+            let idFound = false; 
+            for (const task of tasks) {
+                if (task["id"] === parseInt(id)) {
+                   task["status"] = 'done'; 
+                   idFound = true;
+                }
+            }
+            if (!idFound) {
+                throw new Error('Invalid id/id does not exist.');
+            }
+            await writeFile('./tasks.json', JSON.stringify(tasks));
+            console.log(`Output: Task updated successfully. (ID: ${id})`);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
-function markTaskTodo(){
+async function markTaskTodo(id){
+    let tasks = []
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+        try {
+            const file = await readFile('./tasks.json');
+            tasks = JSON.parse(file);
+            const now = new Date().toISOString();
+            let idFound = false;
+            for (const task of tasks) {
+                if (task["id"] === parseInt(id)) {
+                   task["status"] = 'todo'; 
+                   idFound = true;
+                }
+            }
+            if (!idFound) {
+                throw new Error('Invalid id/id does not exist.');
+            }
+            await writeFile('./tasks.json', JSON.stringify(tasks));
+            console.log(`Output: Task updated successfully. (ID: ${id})`);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 

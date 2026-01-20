@@ -16,7 +16,7 @@ const subCommands = {
     "add": addTask,
     "update": updateTask,
     "delete": deleteTask,
-    "list": listAllTasks,
+    "list": listTasks,
     "mark-in-progress": markTaskInProgress,
     "mark-done": markTaskDone,
     "mark-todo": markTaskTodo
@@ -33,6 +33,15 @@ if(subCommand === "add"){
         throw new Error('Error. Perhaps you\'re missing an input?');
     }
     subCommands["add"](description);
+}
+
+if(subCommand === "list"){
+    const stats = argv[4];
+    if(stats === undefined){
+        subCommands["list"](); 
+    } else {
+        subCommands["list"](stats);
+    }
 }
 
 async function addTask(description){
@@ -77,7 +86,40 @@ function updateTask(){
 function deleteTask(){
 }
 
-function listAllTasks(){
+async function listTasks(status=undefined){
+    let tasks = [];
+    let fileExist = existsSync('tasks.json');
+    if (!fileExist) {
+        console.log('Tasks database is empty.');
+    } else {
+        const file = await readFile('./tasks.json');
+        tasks = JSON.parse(file);
+        if(!([undefined, "todo", "in-progress", "done"].includes(status))){
+            throw new Error('Status not recognized/does not exist.');
+        }
+        if(status === undefined){
+           for (const task of tasks) {
+               console.log(`Task ID: ${task["id"]}`);
+               console.log(`Task Description: ${task["description"]}`);
+               console.log(`Task Status: ${task["status"]}`);
+               console.log(`Created at: ${task["createdAt"]}`);
+               console.log(`Updated at: ${task["updatedAt"]}`);
+               console.log('\n');
+           }
+        } else {
+          for (const task of tasks) {
+            if (task["status"] === status){
+               console.log(`Task ID: ${task["id"]}`);
+               console.log(`Task Description: ${task["description"]}`);
+               console.log(`Task Status: ${task["status"]}`);
+               console.log(`Created at: ${task["createdAt"]}`);
+               console.log(`Updated at: ${task["updatedAt"]}`);
+               console.log('\n');
+
+            }
+          }
+       }
+    }
 }
 
 function markTaskInProgress(){
